@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { checkAuth } from '@/lib/auth'
+// import { checkAuth } from '@/lib/auth'
 import { getBot } from '@/lib/telegramBot'
 
 export async function POST(req: Request) {
@@ -27,7 +27,13 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: true })
-  } catch (error) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred'
+    console.error('Notification error:', err)
+    
+    return NextResponse.json(
+      { error: errorMessage }, 
+      { status: 500 }
+    )
   }
 }
