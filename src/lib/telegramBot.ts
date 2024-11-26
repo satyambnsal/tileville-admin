@@ -69,6 +69,8 @@ Available Commands:
 /unlink - Disconnect your wallet
 
 Get started by linking your wallet with the /link command!
+
+Need help? Join our bug report channel: https://t.me/tilevilleBugs
       `.trim();
 
       await ctx.reply(welcomeMessage, {
@@ -102,7 +104,7 @@ Get started by linking your wallet with the /link command!
    • Results and rewards
    • Important game updates
 
-Need assistance? join telegram bug repor: tileville.xyz/support
+Need help? Join our bug report channel: https://t.me/tilevilleBugs
       `.trim();
 
       await ctx.reply(helpMessage, {
@@ -126,6 +128,8 @@ Example:
 \`/link B62qjsV2...\`
 
 Your wallet address can be found in your TileVille profile settings.
+
+Having trouble? Join our bug report channel: https://t.me/tilevilleBugs
         `.trim();
 
         await ctx.reply(linkHelp, {
@@ -156,6 +160,8 @@ This Telegram account is already linked to wallet:
 \`${address}\`
 
 Use /unlink first if you want to link a different wallet.
+
+Need help? Join our bug report channel: https://t.me/tilevilleBugs
           `.trim(),
             {
               parse_mode: "Markdown",
