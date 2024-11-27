@@ -4,14 +4,38 @@ import { UserMapService } from "../services/userMapService";
 
 export const handleStatusCommand = (userMapService: UserMapService) => {
   return async (ctx: Context) => {
-    if (!ctx.chat) return;
+    try {
+      if (!ctx.chat) {
+        console.error("Chat context not found");
+        return;
+      }
 
-    const chatId = ctx.chat.id.toString();
-    const linkedWallet = userMapService.getAddressByChatId(chatId);
+      const chatId = ctx.chat.id.toString();
 
-    if (linkedWallet) {
-      await ctx.reply(
-        `
+      // Check if user exists in UserMapService first
+      if (!userMapService.isChatIdLinked(chatId)) {
+        await ctx.reply(
+          `
+❌ *No Wallet Connected*
+
+You haven't linked a TileVille wallet yet.
+Use /link <wallet_address> to connect your wallet and start receiving notifications.
+
+Need help? Use /help for more information.
+          `.trim(),
+          {
+            parse_mode: "Markdown",
+          }
+        );
+        return;
+      }
+
+      // Only try to get the wallet if we know the user is linked
+      const linkedWallet = userMapService.getAddressByChatId(chatId);
+
+      if (linkedWallet) {
+        await ctx.reply(
+          `
 📱 *Current Status*
 
 *Linked Wallet:*
@@ -25,23 +49,30 @@ export const handleStatusCommand = (userMapService: UserMapService) => {
 ✅ Important announcements
 
 Use /unlink to disconnect this wallet.
-      `.trim(),
-        {
-          parse_mode: "Markdown",
-        }
-      );
-    } else {
+          `.trim(),
+          {
+            parse_mode: "Markdown",
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Error in status command:", error);
       await ctx.reply(
         `
-❌ *No Wallet Connected*
+⚠️ *Error Checking Status*
 
-You haven't linked a TileVille wallet yet.
-Use /link <wallet_address> to connect your wallet and start receiving notifications.
+Sorry, there was an error checking your status. Please try again later.
 
-Need help? Use /help for more information.
-      `.trim(),
+If the problem persists:
+• Check if the bot is working with /start
+• Report the issue in our support channel
+• Try again in a few minutes
+
+Need help? Join our bug report channel: https://t.me/tilevilleBugs
+        `.trim(),
         {
           parse_mode: "Markdown",
+          link_preview_options: { is_disabled: true },
         }
       );
     }
