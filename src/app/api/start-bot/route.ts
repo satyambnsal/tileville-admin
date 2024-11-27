@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 // import { checkAuth } from '@/lib/auth'
-import { getBot } from "@/lib/telegramBot";
+import { getBot } from "@/lib/telegram";
 
 export async function POST() {
   try {
