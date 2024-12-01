@@ -40,42 +40,7 @@ To unlink this wallet, use /unlink
         return;
       }
 
-      // If user exists but not authenticated
-      if (existingAuth && !existingAuth.authenticated) {
-        await ctx.reply(
-          `
-⏳ *Verification Pending*
-
-You've already started the verification process. Please complete it using the link below:
-
-localhost:3001/verify?chatId=${chatId}
-
-Need help? Join our bug report channel: https://t.me/tilevilleBugs
-          `.trim(),
-          {
-            parse_mode: "Markdown",
-            link_preview_options: { is_disabled: true },
-          }
-        );
-        return;
-      }
-
-      // For new users
-      const { error: insertError } = await supabaseServiceClient
-        .from("telegram_auth")
-        .insert([
-          {
-            chat_id: chatId,
-            authenticated: false,
-          },
-        ]);
-
-      if (insertError) {
-        console.error("Insert error:", insertError);
-        throw insertError;
-      }
-
-      // Generate the verification URL with chatId
+      // For both new users and pending verifications
       const verificationUrl = `localhost:3001/verify?chatId=${chatId}`;
 
       await ctx.reply(
@@ -99,7 +64,6 @@ localhost:3001/verify?chatId=${chatId}
     } catch (error) {
       console.error("Error in link command:", error);
 
-      // Send a user-friendly error message
       await ctx.reply(
         `
 ❌ *Error*
