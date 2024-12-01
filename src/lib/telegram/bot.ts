@@ -64,7 +64,7 @@ export class TilevilleBot {
     this.bot.command("start", handleStartCommand);
     this.bot.command("help", handleHelpCommand);
     this.bot.command("link", handleLinkCommand(this.userMapService));
-    this.bot.command("status", handleStatusCommand(this.userMapService));
+    this.bot.command("status", handleStatusCommand());
     this.bot.command("unlink", handleUnlinkCommand(this.userMapService));
 
     // Handle unknown commands

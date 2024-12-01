@@ -1,8 +1,9 @@
 // src/lib/telegram/commands/statusCommand.ts
-import { Context } from "telegraf";
-import { UserMapService } from "../services/userMapService";
 
-export const handleStatusCommand = (userMapService: UserMapService) => {
+import { supabaseServiceClient } from "@/db/config/server";
+import { Context } from "telegraf";
+
+export const handleStatusCommand = () => {
   return async (ctx: Context) => {
     try {
       if (!ctx.chat) {
@@ -12,66 +13,60 @@ export const handleStatusCommand = (userMapService: UserMapService) => {
 
       const chatId = ctx.chat.id.toString();
 
-      // Check if user exists in UserMapService first
-      if (!userMapService.isChatIdLinked(chatId)) {
+      const { data: authData, error } = await supabaseServiceClient
+        .from("telegram_auth")
+        .select("*")
+        .eq("chat_id", chatId)
+        .single();
+
+      if (error || !authData) {
         await ctx.reply(
-          `
-❌ *No Wallet Connected*
-
-You haven't linked a TileVille wallet yet.
-Use /link <wallet_address> to connect your wallet and start receiving notifications.
-
-Need help? Use /help for more information.
-          `.trim(),
-          {
-            parse_mode: "Markdown",
-          }
+          "❌ No Wallet Connected\n\n" +
+            "You haven't linked a TileVille wallet yet.\n" +
+            "Use /link to connect your wallet and start receiving notifications.\n\n" +
+            "Need help? Use /help for more information.",
+          { parse_mode: "HTML" }
         );
         return;
       }
 
-      // Only try to get the wallet if we know the user is linked
-      const linkedWallet = userMapService.getAddressByChatId(chatId);
-
-      if (linkedWallet) {
+      if (!authData.authenticated) {
         await ctx.reply(
-          `
-📱 *Current Status*
-
-*Linked Wallet:*
-\`${linkedWallet}\`
-
-*Notifications Enabled:*
-✅ Competition announcements
-✅ Competition results
-✅ Game updates
-✅ System maintenance
-✅ Important announcements
-
-Use /unlink to disconnect this wallet.
-          `.trim(),
-          {
-            parse_mode: "Markdown",
-          }
+          "⚠️ Wallet Verification Pending\n\n" +
+            "Your wallet connection is not yet verified.\n" +
+            "Please complete the verification process using the link provided in the /link command.\n\n" +
+            "Need help? Use /help for more information.",
+          { parse_mode: "HTML" }
         );
+        return;
       }
+
+      await ctx.reply(
+        "📱 <b>Current Status</b>\n\n" +
+          "<b>Linked Wallet:</b>\n" +
+          `<code>${authData.wallet_address || "Not found"}</code>\n\n` +
+          "<b>Verification Status:</b> ✅ Verified\n\n" +
+          "<b>Notifications Enabled:</b>\n" +
+          "✅ Competition announcements\n" +
+          "✅ Competition results\n" +
+          "✅ Game updates\n" +
+          "✅ System maintenance\n" +
+          "✅ Important announcements\n\n" +
+          "Use /unlink to disconnect this wallet.",
+        { parse_mode: "HTML" }
+      );
     } catch (error) {
       console.error("Error in status command:", error);
       await ctx.reply(
-        `
-⚠️ *Error Checking Status*
-
-Sorry, there was an error checking your status. Please try again later.
-
-If the problem persists:
-• Check if the bot is working with /start
-• Report the issue in our support channel
-• Try again in a few minutes
-
-Need help? Join our bug report channel: https://t.me/tilevilleBugs
-        `.trim(),
+        "⚠️ Error Checking Status\n\n" +
+          "Sorry, there was an error checking your status. Please try again later.\n\n" +
+          "If the problem persists:\n" +
+          "• Check if the bot is working with /start\n" +
+          "• Report the issue in our support channel\n" +
+          "• Try again in a few minutes\n\n" +
+          "Need help? Join our bug report channel: https://t.me/tilevilleBugs",
         {
-          parse_mode: "Markdown",
+          parse_mode: "HTML",
           link_preview_options: { is_disabled: true },
         }
       );
