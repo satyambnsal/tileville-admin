@@ -96,6 +96,18 @@ export class TilevilleBot {
     }
   }
 
+  async sendDirectMessage(chatId: string, message: string) {
+    try {
+      await this.bot.telegram.sendMessage(chatId, message, {
+        parse_mode: "Markdown",
+      });
+      return true;
+    } catch (error) {
+      console.error("Error sending direct message:", error);
+      throw error;
+    }
+  }
+
   // Notification methods
   async notifyNewCompetition(userAddress: string, data: CompetitionData) {
     return this.notificationService.notifyNewCompetition(userAddress, data);
