@@ -51,8 +51,7 @@ export const handleStatusCommand = () => {
           "✅ Competition results\n" +
           "✅ Game updates\n" +
           "✅ System maintenance\n" +
-          "✅ Important announcements\n\n" +
-          "Use /unlink to disconnect this wallet.",
+          "✅ Important announcements\n\n",
         { parse_mode: "HTML" }
       );
     } catch (error) {

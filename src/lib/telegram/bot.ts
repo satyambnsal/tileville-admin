@@ -9,7 +9,6 @@ import {
   handleHelpCommand,
   handleLinkCommand,
   handleStatusCommand,
-  handleUnlinkCommand,
 } from "./commands";
 import {
   CompetitionData,
@@ -52,7 +51,6 @@ export class TilevilleBot {
           description: "Check your current notification settings",
         },
         { command: "help", description: "Show all available commands" },
-        { command: "unlink", description: "Unlink your TileVille account" },
       ]);
       console.log("Bot commands setup successfully");
     } catch (error) {
@@ -65,7 +63,6 @@ export class TilevilleBot {
     this.bot.command("help", handleHelpCommand);
     this.bot.command("link", handleLinkCommand());
     this.bot.command("status", handleStatusCommand());
-    this.bot.command("unlink", handleUnlinkCommand(this.userMapService));
 
     // Handle unknown commands
     this.bot.on("text", async (ctx) => {

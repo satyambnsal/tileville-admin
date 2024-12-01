@@ -31,7 +31,6 @@ export const handleLinkCommand = () => {
 Your wallet \`${existingAuth.wallet_address}\` is already connected and verified.
 
 To check your current status, use /status
-To unlink this wallet, use /unlink
           `.trim(),
           {
             parse_mode: "Markdown",

@@ -13,7 +13,6 @@ Available Commands:
 /link - Connect your TileVille wallet
 /status - Check your notification settings
 /help - Show all commands
-/unlink - Disconnect your wallet
 
 Get started by linking your wallet with the /link command!
 
@@ -26,7 +25,6 @@ Need help? Join our bug report channel: https://t.me/tilevilleBugs
 /start - Start the bot and see welcome message
 /link - Connect your wallet to receive notifications
 /status - Check your wallet connection status
-/unlink - Disconnect your wallet from notifications
 /help - Show this help message
 
 *Wallet Connection Process:*
@@ -44,7 +42,6 @@ Need help? Join our bug report channel: https://t.me/tilevilleBugs
 
 *Managing Your Connection:*
 • Use /status to check your current connection
-• Use /unlink to disconnect your wallet
 • Reconnect anytime using /link
 
 Need help? Join our bug report channel: https://t.me/tilevilleBugs
