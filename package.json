@@ -2,6 +2,10 @@
   "name": "tileville-admin",
   "version": "0.1.0",
   "private": true,
+  "author": {
+    "email": "tilevillesocial@gmail.com",
+    "name": "Tileville team"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
