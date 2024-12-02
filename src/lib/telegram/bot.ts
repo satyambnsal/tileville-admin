@@ -105,6 +105,19 @@ export class TilevilleBot {
     }
   }
 
+  async sendGroupMessage(groupId: string, message: string, topicId?: number) {
+    try {
+      await this.bot.telegram.sendMessage(groupId, message, {
+        parse_mode: "Markdown",
+        message_thread_id: topicId, // This is used for topics in supergroups
+      });
+      return true;
+    } catch (error) {
+      console.error("Error sending group message:", error);
+      throw error;
+    }
+  }
+
   // Notification methods
   async notifyNewCompetition(userAddress: string, data: CompetitionData) {
     return this.notificationService.notifyNewCompetition(userAddress, data);
