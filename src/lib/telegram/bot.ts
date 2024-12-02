@@ -109,7 +109,7 @@ export class TilevilleBot {
     try {
       await this.bot.telegram.sendMessage(groupId, message, {
         parse_mode: "Markdown",
-        message_thread_id: topicId, // This is used for topics in supergroups
+        message_thread_id: topicId,
       });
       return true;
     } catch (error) {

@@ -1,3 +1,4 @@
+// src/app/api/telegram/group-messages/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/lib/middleware/adminAuth";
 import { getBot } from "@/lib/telegram";
