@@ -16,6 +16,7 @@ import {
   UpdateData,
   AnnouncementData,
 } from "./types";
+import { Update } from "telegraf/types";
 
 export class TilevilleBot {
   private bot: Telegraf;
@@ -40,6 +41,15 @@ export class TilevilleBot {
 
   private async setupCommands() {
     try {
+      // First, delete commands for all scopes
+      await this.bot.telegram.deleteMyCommands();
+
+      // Explicitly delete commands for groups
+      await this.bot.telegram.deleteMyCommands({
+        scope: { type: "all_group_chats" },
+      });
+
+      // Set commands only for private chats
       await this.bot.telegram.setMyCommands(
         [
           {
@@ -56,8 +66,12 @@ export class TilevilleBot {
           },
           { command: "help", description: "Show all available commands" },
         ],
-        { scope: { type: "all_private_chats" } }
+        {
+          scope: { type: "all_private_chats" },
+          language_code: "en",
+        }
       );
+
       console.log("Bot commands setup successfully");
     } catch (error) {
       console.error("Error setting up bot commands:", error);
@@ -65,23 +79,40 @@ export class TilevilleBot {
   }
 
   private setupCommandHandlers() {
-    const privateChat = async (ctx: Context, next: () => Promise<void>) => {
+    const privateChat = async (
+      ctx: Context<Update>,
+      next: () => Promise<void>
+    ) => {
       if (ctx.chat?.type === "private") {
         return next();
       }
-      // Silently ignore commands in groups
-      return;
+      // For groups, check if it's a text message with a command
+      if (
+        ctx.message &&
+        "text" in ctx.message &&
+        ctx.message.text?.startsWith("/")
+      ) {
+        return; // Silently ignore commands in groups
+      }
+      return next(); // Allow non-command messages to pass through
     };
 
-    // Apply private chat middleware to all command handlers
-    this.bot.command("start", privateChat, handleStartCommand);
-    this.bot.command("help", privateChat, handleHelpCommand);
-    this.bot.command("link", privateChat, handleLinkCommand());
-    this.bot.command("status", privateChat, handleStatusCommand());
+    // Use middleware for all updates
+    this.bot.use(privateChat);
+
+    this.bot.command("start", handleStartCommand);
+    this.bot.command("help", handleHelpCommand);
+    this.bot.command("link", handleLinkCommand());
+    this.bot.command("status", handleStatusCommand());
 
     // Handle unknown commands only in private chats
-    this.bot.on("text", privateChat, async (ctx) => {
-      if (ctx.message.text.startsWith("/")) {
+    this.bot.on("text", async (ctx) => {
+      if (
+        ctx.chat?.type === "private" &&
+        ctx.message &&
+        "text" in ctx.message &&
+        ctx.message.text.startsWith("/")
+      ) {
         await ctx.reply(messages.unknownCommand, { parse_mode: "Markdown" });
       }
     });
