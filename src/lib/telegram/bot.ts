@@ -1,5 +1,5 @@
 // src/lib/telegram/bot.ts
-import { Telegraf } from "telegraf";
+import { Telegraf, Context } from "telegraf";
 import { TelegramConfig } from "./types";
 import { UserMapService } from "./services/userMapService";
 import { NotificationService } from "./services/notificationService";
@@ -40,18 +40,24 @@ export class TilevilleBot {
 
   private async setupCommands() {
     try {
-      await this.bot.telegram.setMyCommands([
-        {
-          command: "start",
-          description: "Start the bot and get welcome message",
-        },
-        { command: "link", description: "Link your TileVille wallet address" },
-        {
-          command: "status",
-          description: "Check your current notification settings",
-        },
-        { command: "help", description: "Show all available commands" },
-      ]);
+      await this.bot.telegram.setMyCommands(
+        [
+          {
+            command: "start",
+            description: "Start the bot and get welcome message",
+          },
+          {
+            command: "link",
+            description: "Link your TileVille wallet address",
+          },
+          {
+            command: "status",
+            description: "Check your current notification settings",
+          },
+          { command: "help", description: "Show all available commands" },
+        ],
+        { scope: { type: "all_private_chats" } }
+      );
       console.log("Bot commands setup successfully");
     } catch (error) {
       console.error("Error setting up bot commands:", error);
@@ -59,13 +65,22 @@ export class TilevilleBot {
   }
 
   private setupCommandHandlers() {
-    this.bot.command("start", handleStartCommand);
-    this.bot.command("help", handleHelpCommand);
-    this.bot.command("link", handleLinkCommand());
-    this.bot.command("status", handleStatusCommand());
+    const privateChat = async (ctx: Context, next: () => Promise<void>) => {
+      if (ctx.chat?.type === "private") {
+        return next();
+      }
+      // Silently ignore commands in groups
+      return;
+    };
 
-    // Handle unknown commands
-    this.bot.on("text", async (ctx) => {
+    // Apply private chat middleware to all command handlers
+    this.bot.command("start", privateChat, handleStartCommand);
+    this.bot.command("help", privateChat, handleHelpCommand);
+    this.bot.command("link", privateChat, handleLinkCommand());
+    this.bot.command("status", privateChat, handleStatusCommand());
+
+    // Handle unknown commands only in private chats
+    this.bot.on("text", privateChat, async (ctx) => {
       if (ctx.message.text.startsWith("/")) {
         await ctx.reply(messages.unknownCommand, { parse_mode: "Markdown" });
       }
