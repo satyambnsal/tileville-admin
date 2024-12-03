@@ -5,11 +5,12 @@ import { getBot } from "@/lib/telegram";
 
 interface GroupMessageRequest {
   message: string;
+  groupTopicId: string;
 }
 
 async function handler(req: NextRequest) {
   try {
-    const { message } = (await req.json()) as GroupMessageRequest;
+    const { message, groupTopicId } = (await req.json()) as GroupMessageRequest;
 
     if (!message) {
       return NextResponse.json(
@@ -20,7 +21,6 @@ async function handler(req: NextRequest) {
 
     const bot = getBot();
     const groupId = process.env.TELEGRAM_GROUP_ID;
-    const topicId = process.env.TELEGRAM_DEMO_GAME_TOPIC_ID;
 
     if (!groupId) {
       return NextResponse.json(
@@ -33,7 +33,7 @@ async function handler(req: NextRequest) {
     await bot.sendGroupMessage(
       groupId,
       message,
-      topicId ? parseInt(topicId) : undefined
+      groupTopicId ? parseInt(groupTopicId) : undefined
     );
 
     return NextResponse.json({ success: true });

@@ -151,11 +151,15 @@ export class TilevilleBot {
     }
   }
 
-  async sendGroupMessage(groupId: string, message: string, topicId?: number) {
+  async sendGroupMessage(
+    groupId: string,
+    message: string,
+    groupTopicId?: number
+  ) {
     try {
       await this.bot.telegram.sendMessage(groupId, message, {
         parse_mode: "Markdown",
-        message_thread_id: topicId,
+        message_thread_id: groupTopicId,
       });
       return true;
     } catch (error) {
