@@ -22,6 +22,7 @@ export class TilevilleBot {
   private bot: Telegraf;
   private userMapService: UserMapService;
   private notificationService: NotificationService;
+  private webhookUrl: string | undefined;
 
   constructor(config: TelegramConfig) {
     this.bot = new Telegraf(config.botToken);
@@ -30,6 +31,7 @@ export class TilevilleBot {
       this.bot,
       this.userMapService
     );
+    this.webhookUrl = config.webhookUrl;
 
     this.setupCommands();
     this.setupCommandHandlers();
@@ -120,8 +122,15 @@ export class TilevilleBot {
 
   async start() {
     try {
-      await this.bot.launch();
-      console.log("TileVille bot started successfully");
+      if (this.webhookUrl) {
+        // In production, set up webhook
+        await this.bot.telegram.setWebhook(this.webhookUrl);
+        console.log("Webhook set up successfully:", this.webhookUrl);
+      } else {
+        // In development, use long polling
+        await this.bot.launch();
+        console.log("Bot started in polling mode");
+      }
       return { success: true };
     } catch (error) {
       console.error("Error starting bot:", error);
@@ -129,12 +138,13 @@ export class TilevilleBot {
     }
   }
 
-  async stop() {
+  // Method to handle webhook updates
+  async handleUpdate(update: Update) {
     try {
-      await this.bot.stop();
-      console.log("TileVille bot stopped");
+      await this.bot.handleUpdate(update);
+      return { success: true };
     } catch (error) {
-      console.error("Error stopping bot:", error);
+      console.error("Error handling update:", error);
       throw error;
     }
   }
