@@ -40,7 +40,7 @@ To check your current status, use /status
       }
 
       // For both new users and pending verifications
-      const verificationUrl = `localhost:3001/verify?chatId=${chatId}`;
+      const verificationUrl = `tileville.xyz/verify?chatId=${chatId}`;
 
       await ctx.reply(
         `
@@ -51,9 +51,6 @@ To check your current status, use /status
 3. Return here once completed
 
 [Click here to verify wallet](${verificationUrl})
-or 
-
-localhost:3001/verify?chatId=${chatId}
         `.trim(),
         {
           parse_mode: "Markdown",
