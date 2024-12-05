@@ -65,4 +65,15 @@ Having trouble? Join our bug report channel: https://t.me/tilevilleBugs
 I don't recognize that command.
 Use /help to see all available commands.
   `.trim(),
+
+  groupWelcome: (firstName: string) =>
+    `
+Welcome to TileVille, ${firstName}! 🎮
+
+To get game updates and notifications:
+1. Start a private chat with @tileville\\_mayor\\_bot
+2. Use /link to connect your wallet
+
+Happy gaming! 🏰
+`.trim(),
 };
