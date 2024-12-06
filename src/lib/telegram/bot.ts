@@ -118,6 +118,24 @@ export class TilevilleBot {
         await ctx.reply(messages.unknownCommand, { parse_mode: "Markdown" });
       }
     });
+
+    this.bot.on("new_chat_members", async (ctx) => {
+      const newMembers = ctx.message.new_chat_members;
+
+      for (const member of newMembers) {
+        if (!member.is_bot) {
+          const welcomeMessage = messages.groupWelcome(member.first_name);
+
+          await ctx.telegram.sendMessage(ctx.chat.id, welcomeMessage, {
+            parse_mode: "Markdown",
+            message_thread_id:
+              "message_thread_id" in ctx.message
+                ? ctx.message.message_thread_id
+                : undefined,
+          });
+        }
+      }
+    });
   }
 
   async start() {

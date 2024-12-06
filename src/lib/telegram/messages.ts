@@ -1,4 +1,54 @@
 // src/lib/telegram/messages.ts
+
+const getRandomWelcomeMessage = (firstName: string) => {
+  const messages = [
+    `
+🎮 A new builder has arrived! Welcome to TileVille, ${firstName}! 🏰
+
+Ready to create, compete, and conquer? 
+Connect with @tileville\\_mayor\\_bot in private chat to:
+🎯 Get instant competition alerts
+🏆 Never miss a prize pool
+🔔 Stay updated with game news
+
+Let's build something amazing together! 🌟
+    `,
+    `
+🌟 Welcome to the world of TileVille, ${firstName}! 🎮
+
+Your journey as a master builder begins now! To maximize your experience:
+1️⃣ Start a chat with @tileville\\_mayor\\_bot
+2️⃣ Get notified about new competitions
+3️⃣ Join the building revolution!
+
+See you on the building grounds! 🏗️
+    `,
+    `
+🎉 Hey ${firstName}, welcome to the TileVille community! 🏰
+
+Want to stay ahead in the game?
+📱 Message @tileville\\_mayor\\_bot privately to:
+• Get instant competition alerts 🎯
+• Receive special announcements 📢
+• Track your achievements 🏆
+
+Your building adventure awaits! 🌟
+    `,
+    `
+🏰 Welcome to TileVille's official community, ${firstName}! 
+
+To become a legendary builder:
+🤖 Connect with @tileville\\_mayor\\_bot
+🎯 Get real-time competition updates
+🏆 Never miss a winning opportunity
+
+Ready to shape the future of TileVille? Let's build! 🚀
+    `,
+  ];
+
+  return messages[Math.floor(Math.random() * messages.length)].trim();
+};
+
 export const messages = {
   welcome: `
 🎮 Welcome to TileVille Bot! 🏰
@@ -65,4 +115,6 @@ Having trouble? Join our bug report channel: https://t.me/tilevilleBugs
 I don't recognize that command.
 Use /help to see all available commands.
   `.trim(),
+
+  groupWelcome: getRandomWelcomeMessage,
 };
