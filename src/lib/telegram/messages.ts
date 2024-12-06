@@ -71,8 +71,7 @@ Use /help to see all available commands.
 Welcome to TileVille, ${firstName}! 🎮
 
 To get game updates and notifications:
-1. Start a private chat with @tileville\\_mayor\\_bot
-2. Use /link to connect your wallet
+Start a private chat with @tileville\\_mayor\\_bot
 
 Happy gaming! 🏰
 `.trim(),
