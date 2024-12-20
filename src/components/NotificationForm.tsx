@@ -1,172 +1,183 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
+import { useNotification } from "@/db/react-query-hooks";
+import { useState } from "react";
+
+type NotificationType = "competition" | "announcement" | "maintenance";
+type RecipientType = "all" | "specific";
+
+interface FormState {
+  title: string;
+  message: string;
+  entryFee: string;
+  prizePool: string;
+  addresses: string;
+}
+
+const initialFormState: FormState = {
+  title: "",
+  message: "",
+  entryFee: "1",
+  prizePool: "100",
+  addresses: "",
+};
 
 export default function NotificationForm() {
-  const [type, setType] = useState('competition')
-  const [title, setTitle] = useState('')
-  const [message, setMessage] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [recipients, setRecipients] = useState('all')
-  const [addresses, setAddresses] = useState('')
-  const [entryFee, setEntryFee] = useState('1')
-  const [prizePool, setPrizePool] = useState('100')
+  const [type, setType] = useState<NotificationType>("competition");
+  const [recipients, setRecipients] = useState<RecipientType>("all");
+  const [formData, setFormData] = useState<FormState>(initialFormState);
+  const { mutate: sendNotification, isPending } = useNotification();
+
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
 
-    try {
-      const content = {
-        title,
-        message,
-        ...(type === 'competition' && {
-          name: title,
-          entryFee: parseFloat(entryFee),
-          startTime: new Date(),
-          prizePool: parseFloat(prizePool)
-        }),
-      }
+    const content = {
+      title: formData.title,
+      message: formData.message,
+      ...(type === "competition" && {
+        name: formData.title,
+        entryFee: parseFloat(formData.entryFee),
+        startTime: new Date(),
+        prizePool: parseFloat(formData.prizePool),
+      }),
+    };
 
-      const recipientList =
-        recipients === 'all' ? ['all'] : addresses.split(',').map((addr) => addr.trim())
+    const recipientList =
+      recipients === "all"
+        ? ["all"]
+        : formData.addresses.split(",").map((addr) => addr.trim());
 
-      console.log('Sending notification with data:', {
-        type,
-        content,
-        recipients: recipientList,
-      })
+    await sendNotification({
+      type,
+      content,
+      recipients: recipientList,
+    });
 
-      const res = await fetch('/api/notifications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type,
-          content,
-          recipients: recipientList,
-        }),
-      })
-
-      if (!res.ok) {
-        const errorData = await res.json()
-        throw new Error(errorData.error || 'Failed to send notification')
-      }
-
-      const data = await res.json()
-      console.log('Notification response:', data)
-
-      // Clear form
-      setTitle('')
-      setMessage('')
-      setAddresses('')
-      setEntryFee('1')
-      setPrizePool('100')
-      alert('Notification sent successfully!')
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred'
-      alert(`Error sending notification: ${errorMessage}`)
-    }finally {
-      setLoading(false)
-    }
-  }
+    setFormData(initialFormState);
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-gray-700 mb-2">Notification Type</label>
+      <FormField label="Notification Type">
         <select
+          name="type"
           value={type}
-          onChange={(e) => setType(e.target.value)}
+          onChange={(e) => setType(e.target.value as NotificationType)}
           className="w-full p-2 border rounded"
         >
           <option value="competition">New Competition</option>
           <option value="announcement">General Announcement</option>
           <option value="maintenance">Maintenance Alert</option>
         </select>
-      </div>
+      </FormField>
 
-      <div>
-        <label className="block text-gray-700 mb-2">Title</label>
+      <FormField label="Title">
         <input
           type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          name="title"
+          value={formData.title}
+          onChange={handleInputChange}
           className="w-full p-2 border rounded"
           required
         />
-      </div>
+      </FormField>
 
-      <div>
-        <label className="block text-gray-700 mb-2">Message</label>
+      <FormField label="Message">
         <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          name="message"
+          value={formData.message}
+          onChange={handleInputChange}
           className="w-full p-2 border rounded"
           rows={4}
           required
         />
-      </div>
+      </FormField>
 
-      {type === 'competition' && (
+      {type === "competition" && (
         <>
-          <div>
-            <label className="block text-gray-700 mb-2">Entry Fee (MINA)</label>
+          <FormField label="Entry Fee (MINA)">
             <input
               type="number"
-              value={entryFee}
-              onChange={(e) => setEntryFee(e.target.value)}
+              name="entryFee"
+              value={formData.entryFee}
+              onChange={handleInputChange}
               className="w-full p-2 border rounded"
               min="0"
               step="0.1"
               required
             />
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block text-gray-700 mb-2">Prize Pool (MINA)</label>
+          <FormField label="Prize Pool (MINA)">
             <input
               type="number"
-              value={prizePool}
-              onChange={(e) => setPrizePool(e.target.value)}
+              name="prizePool"
+              value={formData.prizePool}
+              onChange={handleInputChange}
               className="w-full p-2 border rounded"
               min="0"
               step="0.1"
               required
             />
-          </div>
+          </FormField>
         </>
       )}
 
-      <div>
-        <label className="block text-gray-700 mb-2">Recipients</label>
+      <FormField label="Recipients">
         <select
+          name="recipients"
           value={recipients}
-          onChange={(e) => setRecipients(e.target.value)}
+          onChange={(e) => setRecipients(e.target.value as RecipientType)}
           className="w-full p-2 border rounded mb-2"
         >
           <option value="all">All Users</option>
           <option value="specific">Specific Addresses</option>
         </select>
 
-        {recipients === 'specific' && (
+        {recipients === "specific" && (
           <textarea
-            value={addresses}
-            onChange={(e) => setAddresses(e.target.value)}
+            name="addresses"
+            value={formData.addresses}
+            onChange={handleInputChange}
             placeholder="Enter wallet addresses, separated by commas"
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded mt-2"
             rows={3}
             required
           />
         )}
-      </div>
+      </FormField>
 
       <button
         type="submit"
-        disabled={loading}
+        disabled={isPending}
         className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-blue-300"
       >
-        {loading ? 'Sending...' : 'Send Notification'}
+        {isPending ? "Sending..." : "Send Notification"}
       </button>
     </form>
-  )
+  );
+}
+
+function FormField({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <label className="block text-gray-700 mb-2">{label}</label>
+      {children}
+    </div>
+  );
 }
