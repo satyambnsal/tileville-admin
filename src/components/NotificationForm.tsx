@@ -2,8 +2,8 @@
 
 import { useNotification } from "@/db/react-query-hooks";
 import { useState } from "react";
+import { NotificationType, NotificationContent } from "@/types/notifications";
 
-type NotificationType = "competition" | "announcement" | "maintenance";
 type RecipientType = "all" | "specific";
 
 interface FormState {
@@ -12,6 +12,9 @@ interface FormState {
   entryFee: string;
   prizePool: string;
   addresses: string;
+  challengeName: string;
+  prizeAmount: string;
+  transactionHash: string;
 }
 
 const initialFormState: FormState = {
@@ -20,6 +23,9 @@ const initialFormState: FormState = {
   entryFee: "1",
   prizePool: "100",
   addresses: "",
+  challengeName: "",
+  prizeAmount: "",
+  transactionHash: "",
 };
 
 export default function NotificationForm() {
@@ -40,16 +46,28 @@ export default function NotificationForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const content = {
+    let content: NotificationContent = {
       title: formData.title,
       message: formData.message,
-      ...(type === "competition" && {
+    };
+
+    if (type === "competition") {
+      content = {
+        ...content,
         name: formData.title,
         entryFee: parseFloat(formData.entryFee),
         startTime: new Date(),
         prizePool: parseFloat(formData.prizePool),
-      }),
-    };
+      };
+    } else if (type === "prize") {
+      content = {
+        title: "Prize Won! 🎉",
+        message: `Congratulations! You've won ${formData.prizeAmount} MINA in the "${formData.challengeName}" challenge.\n\nTransaction Hash: ${formData.transactionHash}`,
+        challengeName: formData.challengeName,
+        prizeAmount: parseFloat(formData.prizeAmount),
+        transactionHash: formData.transactionHash,
+      };
+    }
 
     const recipientList =
       recipients === "all"
@@ -77,30 +95,35 @@ export default function NotificationForm() {
           <option value="competition">New Competition</option>
           <option value="announcement">General Announcement</option>
           <option value="maintenance">Maintenance Alert</option>
+          <option value="prize">Prize Notification</option>
         </select>
       </FormField>
 
-      <FormField label="Title">
-        <input
-          type="text"
-          name="title"
-          value={formData.title}
-          onChange={handleInputChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-      </FormField>
+      {type !== "prize" && (
+        <>
+          <FormField label="Title">
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </FormField>
 
-      <FormField label="Message">
-        <textarea
-          name="message"
-          value={formData.message}
-          onChange={handleInputChange}
-          className="w-full p-2 border rounded"
-          rows={4}
-          required
-        />
-      </FormField>
+          <FormField label="Message">
+            <textarea
+              name="message"
+              value={formData.message}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded"
+              rows={4}
+              required
+            />
+          </FormField>
+        </>
+      )}
 
       {type === "competition" && (
         <>
@@ -126,6 +149,45 @@ export default function NotificationForm() {
               className="w-full p-2 border rounded"
               min="0"
               step="0.1"
+              required
+            />
+          </FormField>
+        </>
+      )}
+
+      {type === "prize" && (
+        <>
+          <FormField label="Challenge Name">
+            <input
+              type="text"
+              name="challengeName"
+              value={formData.challengeName}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </FormField>
+
+          <FormField label="Prize Amount (MINA)">
+            <input
+              type="number"
+              name="prizeAmount"
+              value={formData.prizeAmount}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded"
+              min="0"
+              step="0.1"
+              required
+            />
+          </FormField>
+
+          <FormField label="Transaction Hash">
+            <input
+              type="text"
+              name="transactionHash"
+              value={formData.transactionHash}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded"
               required
             />
           </FormField>

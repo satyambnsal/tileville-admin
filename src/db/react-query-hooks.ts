@@ -1,20 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-
-interface NotificationContent {
-  title: string;
-  message: string;
-  entryFee?: number;
-  prizePool?: number;
-  startTime?: Date;
-  name?: string;
-}
-
-interface NotificationPayload {
-  type: "competition" | "announcement" | "maintenance";
-  content: NotificationContent;
-  recipients: string[];
-}
+import { NotificationPayload } from "@/types/notifications";
 
 export const useNotification = () => {
   return useMutation({
