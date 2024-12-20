@@ -12,7 +12,7 @@ export class NotificationService {
   constructor(private bot: Telegraf, private userMapService: UserMapService) {}
 
   async notifyNewCompetition(userAddress: string, data: CompetitionData) {
-    const chatId = this.userMapService.getChatId(userAddress);
+    const chatId = await this.userMapService.getChatId(userAddress);
     if (!chatId) return;
 
     const msg = `
@@ -35,7 +35,7 @@ Join now: https://tileville.xyz/competitions/${encodeURIComponent(data.name)}
   }
 
   async notifyMaintenance(userAddress: string, data: MaintenanceData) {
-    const chatId = this.userMapService.getChatId(userAddress);
+    const chatId = await this.userMapService.getChatId(userAddress);
     if (!chatId) return;
 
     const msg = `
@@ -54,7 +54,7 @@ ${data.duration ? `\n⏱ *Duration:* ${data.duration}` : ""}
   }
 
   async notifyUpdate(userAddress: string, data: UpdateData) {
-    const chatId = this.userMapService.getChatId(userAddress);
+    const chatId = await this.userMapService.getChatId(userAddress);
     if (!chatId) return;
 
     const msg = `
@@ -75,7 +75,7 @@ Check it out at: https://tileville.xyz
   }
 
   async notifyAnnouncement(userAddress: string, data: AnnouncementData) {
-    const chatId = this.userMapService.getChatId(userAddress);
+    const chatId = await this.userMapService.getChatId(userAddress);
     if (!chatId) return;
 
     const priorityEmoji = {

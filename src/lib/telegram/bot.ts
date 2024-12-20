@@ -213,7 +213,7 @@ export class TilevilleBot {
     return this.notificationService.notifyAnnouncement(userAddress, data);
   }
 
-  isUserRegistered(userAddress: string): boolean {
+  async isUserRegistered(userAddress: string): Promise<boolean> {
     return this.userMapService.isUserRegistered(userAddress);
   }
 }
