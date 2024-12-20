@@ -1,28 +1,63 @@
 // src/lib/telegram/services/userMapService.ts
-export class UserMapService {
-  private userMap: Map<string, string> = new Map();
+import { supabaseServiceClient } from "@/db/config/server";
 
+export class UserMapService {
   async linkUser(userAddress: string, chatId: string) {
-    this.userMap.set(userAddress, chatId);
+    const { error } = await supabaseServiceClient.from("telegram_auth").insert({
+      wallet_address: userAddress,
+      chat_id: chatId,
+    });
+
+    if (error) {
+      console.error(
+        `Error linking wallet ${userAddress} to chat ${chatId}:`,
+        error
+      );
+      throw error;
+    }
+
     console.log(`Linked wallet ${userAddress} to chat ${chatId}`);
   }
 
-  getChatId(userAddress: string): string | undefined {
-    return this.userMap.get(userAddress);
+  async getChatId(userAddress: string): Promise<string | undefined> {
+    const { data, error } = await supabaseServiceClient
+      .from("telegram_auth")
+      .select("chat_id")
+      .eq("wallet_address", userAddress)
+      .single();
+
+    if (error || !data || !data.chat_id) return undefined;
+    return data.chat_id;
   }
 
-  getAddressByChatId(chatId: string): string | undefined {
-    for (const [address, id] of this.userMap.entries()) {
-      if (id === chatId) return address;
-    }
-    return undefined;
+  async getAddressByChatId(chatId: string): Promise<string | undefined> {
+    const { data, error } = await supabaseServiceClient
+      .from("telegram_auth")
+      .select("wallet_address")
+      .eq("chat_id", chatId)
+      .single();
+
+    if (error || !data || !data.wallet_address) return undefined;
+    return data.wallet_address;
   }
 
-  isChatIdLinked(chatId: string): boolean {
-    return Array.from(this.userMap.values()).includes(chatId);
+  async isChatIdLinked(chatId: string): Promise<boolean> {
+    const { data, error } = await supabaseServiceClient
+      .from("telegram_auth")
+      .select("id")
+      .eq("chat_id", chatId)
+      .single();
+
+    return !error && !!data;
   }
 
-  isUserRegistered(userAddress: string): boolean {
-    return this.userMap.has(userAddress);
+  async isUserRegistered(userAddress: string): Promise<boolean> {
+    const { data, error } = await supabaseServiceClient
+      .from("telegram_auth")
+      .select("id")
+      .eq("wallet_address", userAddress)
+      .single();
+
+    return !error && !!data;
   }
 }
